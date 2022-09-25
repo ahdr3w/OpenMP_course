@@ -5,12 +5,12 @@
 
 int operation(int a, int b, int c) 
 {
-        return a % 3 == 0 ? (a / 3) * b * c : (b % 3 == 0 ? a * (b / 3) * c : a * b * (c / 3));
+        return a * b * c / 3;
 }
 
 int main() 
 {
-    int* array = new int[ARRAY_SIZE];
+    unsigned long long* array = new unsigned long long[ARRAY_SIZE];
     for (int i = 0; i < ARRAY_SIZE; i++)
         array[i] = i;
     /*  
@@ -20,15 +20,17 @@ int main()
                 array[i] = operation(i - 1, i, i + 1); <--------------EZE WAY
         }
     */
-   int init_var = array[0];
-   int flag1 = 0, flag2 = 0;
+
+
+  /* int init_var = array[0];
+   int flag1 = 0, flag2 = 0; <---------------I was trying to use this flags like semafores, but why does it not work???? 
    int num_threads = 1;
    #pragma omp parallel shared(array, init_var, num_threads)
     {
         int var = 0;
         int my_id = omp_get_thread_num();
         num_threads = omp_get_num_threads();
-        #pragma omp for schedule(static, 1)
+        #pragma omp for ordered schedule(static, 1)
         for(int i = 1; i < ARRAY_SIZE; ++i) 
         {
             if (my_id > 0)
@@ -40,25 +42,36 @@ int main()
                 init_var = array[i];
             int idx1 = 1;
             int idx2 = 1;
-            while(idx1) 
-            {
-                if (flag2 % num_threads != 0)
-                    idx1 = 0;
-            }
-            #pragma omp critical
-                ++flag1;
-            
-            while(idx2) 
-            {
-                if (flag2 % num_threads != 0)
-                    idx2 = 0;
-            }
-            #pragma omp critical      
-                ++flag2;
-
+            while(idx1) <-------------------------------------------|
+            {                                                       |
+                if (flag2 % num_threads != 0)                       |
+                    idx1 = 0;                                       |
+            }                                                       |
+            #pragma omp critical                                    |
+                ++flag1;                                            |
+                                                                    |-----no one allowed to join loop before all
+                                                                    |      threads do not leave this loop on previous iteration
+            while(idx2)                                             |
+            {                                                       |
+                if (flag2 % num_threads != 0)                       |
+                    idx2 = 0;                                       |
+            }                                                       |
+            #pragma omp critical                                    |
+                ++flag2;                                            |
+            <-------------------------------------------------------|
             array[i] = var;
-            std::cout << 0;
+            
         } 
+    } */
+    unsigned long long var = 0;
+    #pragma omp parallel for ordered shared(array) private(var) schedule(static,1)
+    for (int i = 0; i < ARRAY_SIZE - 1; ++i) 
+    {
+        int my_id = omp_get_thread_num();
+        var = operation(array[i - 1], array[i], array[i + 1]);
+        #pragma omp ordered
+            printf("Thread %d changed %d variable from %llu to %llu\n", my_id, i, array[i], var);
+            array[i] = var;
     }
 
 }
