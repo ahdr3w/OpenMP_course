@@ -1,4 +1,4 @@
-Realistaion with an additional condition
+Realistaion with both additional conditions
 
 COMMANDS:
 
