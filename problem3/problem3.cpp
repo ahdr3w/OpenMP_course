@@ -63,15 +63,16 @@ int main()
             
         } 
     } */
-    unsigned long long var = 0;
-    #pragma omp parallel for ordered shared(array) private(var) schedule(static,1)
-    for (int i = 0; i < ARRAY_SIZE - 1; ++i) 
-    {
-        int my_id = omp_get_thread_num();
-        var = operation(array[i - 1], array[i], array[i + 1]);
-        #pragma omp ordered
-            printf("Thread %d changed %d variable from %llu to %llu\n", my_id, i, array[i], var);
+    
+    #pragma omp parallel for ordered shared(array) schedule(static,1)
+        for (int i = 0; i < ARRAY_SIZE - 1; ++i) 
+        {   
+            unsigned long long var = 0;
+            int my_id = omp_get_thread_num();
+            var = operation(array[i - 1], array[i], array[i + 1]);
+    #pragma omp ordered
+            //printf("Thread %d changed %d variable from %llu to %llu\n", my_id, i, array[i], var);
             array[i] = var;
-    }
+        }
 
 }
