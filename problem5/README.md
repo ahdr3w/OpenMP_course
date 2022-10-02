@@ -1,5 +1,6 @@
+Numerical calculation of pi number
 Realistaion with an additional condition
 
 COMMANDS:
 
-mkdir CMake; cd CMake; cmake -G "Unix Makefiles" ..; make; cd ..; OMP_NUM_THREADS=8 ./problem5.exe NUMBER
+mkdir CMake; cd CMake; cmake -G "Unix Makefiles" ..; make; cd ..; OMP_NUM_THREADS=8 ./problem5 100000000000
