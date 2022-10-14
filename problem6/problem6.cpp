@@ -5,14 +5,15 @@
 
 using namespace std;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
     int N = atoi(argv[1]);
     int *a = new int[N + 1];
     int result = 0;
     for (int i = 2; i < N + 1; i++)
         a[i] = 1;
     a[0] = 0;
-    a[1] = 0;// a = [0,0, 1, ... , 1]
+    a[1] = 0; // a = [0,0, 1, ... , 1]
     int n_threads = 0;
     double t1 = omp_get_wtime();
     #pragma omp parallel shared(a, N, n_threads)
@@ -26,13 +27,14 @@ int main(int argc, char** argv) {
                 #pragma omp task //the only parallel directive callable inside single section
                 {
                     if (a[p]) //check again if smth changed, 
-                             //it increases performance in to times when N is big 
+                              //it increases performance in to times when N is big 
                         for (int j = p*p; j < N + 1; j += p)
                             a[j] = 0;
                 }
             }
         #pragma omp taskwait
-        } //counting amount of prime numbers after all tasks being completed
+        } 
+        //counting amount of prime numbers after all tasks being completed
         #pragma omp for schedule(static) reduction(+: result)
         for (int i = 0; i < N+1; i++)
             result += a[i];
